@@ -142,7 +142,7 @@
 
       .website-button {
         position: fixed;
-        bottom: 100px;
+        bottom: 30px;
         left: 50%;
         transform: translateX(-50%);
         background-color: #d4a574;
@@ -157,6 +157,8 @@
         z-index: 1001;
         display: none;
         cursor: pointer;
+        border: none;
+        font-family: Arial, sans-serif;
       }
 
       .website-button:hover {
@@ -202,18 +204,28 @@
 
     <div class="instruction" id="instruction">Abra o convite</div>
 
+    <button class="website-button" id="websiteButton">
+      Acessar Site Completo
+    </button>
+
     <script>
       let currentState = 1;
       const body = document.body;
       const instruction = document.getElementById("instruction");
+      const websiteButton = document.getElementById("websiteButton");
 
       const messages = [
         "Clique para abrir o convite ✨",
         "Clique para ver o verso 🌸",
-        "Para mais informações, acesse o novo site",
+        "Clique para mais informações",
       ];
 
-      body.addEventListener("click", () => {
+      body.addEventListener("click", (e) => {
+        // Evita que o clique no botão também dispare o evento do body
+        if (e.target.closest(".website-button")) {
+          return;
+        }
+
         if (currentState === 1) {
           // Do envelope para frente do convite
           currentState = 2;
@@ -221,10 +233,8 @@
           // Da frente para o verso
           currentState = 3;
         } else {
-          // Do verso redireciona para o site
-          window.location.href = "https://lucaseeduarda.com";
-          target = "_blank";
-          return;
+          // Do verso volta para frente
+          currentState = 2;
         }
 
         body.className = `state-${currentState}`;
@@ -241,6 +251,12 @@
             instruction.style.display = "none";
           }, 500);
         }
+      });
+
+      // Adiciona evento de clique no botão para abrir o site em nova aba
+      websiteButton.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.open("https://lucaseeduarda.com", "_blank");
       });
     </script>
   </body>
