@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Convite de Casamento - Lucas & Eduarda</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #cba35c;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        cursor: pointer;
+        overflow: hidden;
+      }
+
+      .container {
+        perspective: 2000px;
+        width: 90%;
+        max-width: 600px;
+      }
+
+      .scene {
+        position: relative;
+        width: 100%;
+        padding-bottom: 141.4%;
+      }
+
+      .card-3d {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 1.2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        transform-origin: center center;
+      }
+
+      .card-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .card-face img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .envelope-face {
+        z-index: 3;
+      }
+
+      .front-face {
+        transform: rotateY(180deg);
+      }
+
+      .back-face {
+        transform: rotateY(0deg);
+      }
+
+      /* Estado 1: Mostra envelope */
+      .state-1 .card-3d {
+        transform: rotateY(0deg);
+      }
+
+      .state-1 .envelope-face {
+        display: block;
+      }
+
+      /* Estado 2: Mostra frente do convite (esconde envelope) */
+      .state-2 .card-3d {
+        transform: rotateY(180deg);
+      }
+
+      .state-2 .envelope-face {
+        display: none;
+      }
+
+      /* Estado 3: Mostra verso do convite (esconde envelope) */
+      .state-3 .card-3d {
+        transform: rotateY(360deg);
+      }
+
+      .state-3 .envelope-face {
+        display: none;
+      }
+
+      .instruction {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 15px 30px;
+        border-radius: 25px;
+        font-size: 14px;
+        text-align: center;
+        animation: pulse 2s infinite;
+        z-index: 1000;
+        transition: opacity 0.5s;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .container {
+        animation: fadeIn 1s ease-out;
+      }
+    </style>
+  </head>
+  <body class="state-1">
+    <div class="container">
+      <div class="scene">
+        <div class="card-3d">
+          <div class="card-face envelope-face">
+            <img
+              src="C:\Users\Administrador\Downloads\Convite de Casamento Oficial\3.png"
+              alt="Envelope"
+            />
+          </div>
+          <div class="card-face front-face">
+            <img
+              src="C:\Users\Administrador\Downloads\Convite de Casamento Oficial\1.png"
+              alt="Frente do Convite"
+            />
+          </div>
+          <div class="card-face back-face">
+            <img
+              src="C:\Users\Administrador\Downloads\Convite de Casamento Oficial\2.png"
+              alt="Verso do Convite"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="instruction" id="instruction">
+      Clique para abrir o convite ✨
+    </div>
+
+    <script>
+      let currentState = 1;
+      const body = document.body;
+      const instruction = document.getElementById("instruction");
+
+      const messages = [
+        "Clique para abrir o convite ✨",
+        "Clique para ver o verso 🌸",
+        "Clique para ver a frente novamente 💕",
+      ];
+
+      body.addEventListener("click", () => {
+        if (currentState === 1) {
+          // Do envelope para frente do convite
+          currentState = 2;
+        } else if (currentState === 2) {
+          // Da frente para o verso
+          currentState = 3;
+        } else {
+          // Do verso volta para frente
+          currentState = 2;
+        }
+
+        body.className = `state-${currentState}`;
+        instruction.textContent = messages[currentState - 1];
+      });
+
+      // Remove a instrução após alguns cliques
+      let clickCount = 0;
+      body.addEventListener("click", () => {
+        clickCount++;
+        if (clickCount > 3) {
+          instruction.style.opacity = "0";
+          setTimeout(() => {
+            instruction.style.display = "none";
+          }, 500);
+        }
+      });
+    </script>
+  </body>
+</html>
