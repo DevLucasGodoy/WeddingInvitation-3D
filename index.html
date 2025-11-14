@@ -12,7 +12,7 @@
       }
 
       body {
-        background-color: #cba35c;
+        background-color: #e5ffe6;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -139,6 +139,36 @@
       .container {
         animation: fadeIn 1s ease-out;
       }
+
+      .website-button {
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #d4a574;
+        color: white;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s;
+        z-index: 1001;
+        display: none;
+        cursor: pointer;
+      }
+
+      .website-button:hover {
+        background-color: #c49563;
+        transform: translateX(-50%) scale(1.05);
+        box-shadow: 0 7px 25px rgba(0, 0, 0, 0.4);
+      }
+
+      .state-3 .website-button {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+      }
     </style>
   </head>
   <body class="state-1">
@@ -146,21 +176,31 @@
       <div class="scene">
         <div class="card-3d">
           <div class="card-face envelope-face">
-            <img src="./public/3.png" alt="Envelope" />
+            <img
+              src="https://raw.githubusercontent.com/DevLucasGodoy/WeddingInvitation-3D/refs/heads/main/public/3.png"
+              alt="Verso do Convite"
+            />
+            <!-- <img src="./public/3.png" alt="Envelope" /> -->
           </div>
           <div class="card-face front-face">
-            <img src="./public/1.png" alt="Frente do Convite" />
+            <img
+              src="https://raw.githubusercontent.com/DevLucasGodoy/WeddingInvitation-3D/refs/heads/main/public/1.png"
+              alt="Frente do Convite"
+            />
+            <!-- <img src="./public/1.png" alt="Frente do Convite" /> -->
           </div>
           <div class="card-face back-face">
-            <img src="./public/2.png" alt="Verso do Convite" />
+            <img
+              src="https://raw.githubusercontent.com/DevLucasGodoy/WeddingInvitation-3D/refs/heads/main/public/2.png"
+              alt="Verso do Convite"
+            />
+            <!-- <img src="./public/2.png" alt="Verso do Convite" /> -->
           </div>
         </div>
       </div>
     </div>
 
-    <div class="instruction" id="instruction">
-      Clique para abrir o convite ✨
-    </div>
+    <div class="instruction" id="instruction">Abra o convite</div>
 
     <script>
       let currentState = 1;
@@ -170,7 +210,7 @@
       const messages = [
         "Clique para abrir o convite ✨",
         "Clique para ver o verso 🌸",
-        "Clique para ver a frente novamente 💕",
+        "Para mais informações, acesse o novo site",
       ];
 
       body.addEventListener("click", () => {
@@ -181,8 +221,10 @@
           // Da frente para o verso
           currentState = 3;
         } else {
-          // Do verso volta para frente
-          currentState = 2;
+          // Do verso redireciona para o site
+          window.location.href = "https://lucaseeduarda.com";
+          target = "_blank";
+          return;
         }
 
         body.className = `state-${currentState}`;
