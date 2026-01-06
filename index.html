@@ -14,18 +14,21 @@
       body {
         background-color: #e5ffe6;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
         font-family: Arial, sans-serif;
         cursor: pointer;
         overflow: hidden;
+        padding: 20px;
       }
 
       .container {
         perspective: 2000px;
         width: 90%;
         max-width: 600px;
+        margin-bottom: 100px;
       }
 
       .scene {
@@ -142,7 +145,7 @@
 
       .website-button {
         position: fixed;
-        bottom: 30px;
+        bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
         background-color: #d4a574;
@@ -159,6 +162,7 @@
         cursor: pointer;
         border: none;
         font-family: Arial, sans-serif;
+        white-space: nowrap;
       }
 
       .website-button:hover {
@@ -171,6 +175,64 @@
         display: block;
         animation: fadeIn 0.5s ease-out;
       }
+
+      /* Responsividade para telas menores */
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+
+        .container {
+          margin-bottom: 120px;
+          width: 95%;
+        }
+
+        .website-button {
+          bottom: 15px;
+          padding: 12px 30px;
+          font-size: 14px;
+          max-width: 90%;
+        }
+
+        .instruction {
+          bottom: 20px;
+          padding: 12px 25px;
+          font-size: 13px;
+          max-width: 90%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          margin-bottom: 100px;
+        }
+
+        .website-button {
+          bottom: 10px;
+          padding: 10px 25px;
+          font-size: 13px;
+        }
+
+        .instruction {
+          bottom: 15px;
+          padding: 10px 20px;
+          font-size: 12px;
+        }
+      }
+
+      /* Ajuste para telas muito pequenas em altura */
+      @media (max-height: 600px) {
+        .container {
+          margin-bottom: 80px;
+          max-width: 400px;
+        }
+
+        .website-button {
+          bottom: 10px;
+          padding: 10px 25px;
+          font-size: 13px;
+        }
+      }
     </style>
   </head>
   <body class="state-1">
@@ -182,27 +244,22 @@
               src="https://raw.githubusercontent.com/DevLucasGodoy/WeddingInvitation-3D/refs/heads/main/public/3.png"
               alt="Verso do Convite"
             />
-            <!-- <img src="./public/3.png" alt="Envelope" /> -->
           </div>
           <div class="card-face front-face">
             <img
               src="https://raw.githubusercontent.com/DevLucasGodoy/WeddingInvitation-3D/refs/heads/main/public/1.png"
               alt="Frente do Convite"
             />
-            <!-- <img src="./public/1.png" alt="Frente do Convite" /> -->
           </div>
           <div class="card-face back-face">
             <img
               src="https://raw.githubusercontent.com/DevLucasGodoy/WeddingInvitation-3D/refs/heads/main/public/2.png"
               alt="Verso do Convite"
             />
-            <!-- <img src="./public/2.png" alt="Verso do Convite" /> -->
           </div>
         </div>
       </div>
     </div>
-
-    <div class="instruction" id="instruction">Abra o convite</div>
 
     <button class="website-button" id="websiteButton">
       Acessar Site Completo
@@ -221,39 +278,21 @@
       ];
 
       body.addEventListener("click", (e) => {
-        // Evita que o clique no botão também dispare o evento do body
         if (e.target.closest(".website-button")) {
           return;
         }
 
         if (currentState === 1) {
-          // Do envelope para frente do convite
           currentState = 2;
         } else if (currentState === 2) {
-          // Da frente para o verso
           currentState = 3;
         } else {
-          // Do verso volta para frente
           currentState = 2;
         }
 
         body.className = `state-${currentState}`;
-        instruction.textContent = messages[currentState - 1];
       });
 
-      // Remove a instrução após alguns cliques
-      let clickCount = 0;
-      body.addEventListener("click", () => {
-        clickCount++;
-        if (clickCount > 3) {
-          instruction.style.opacity = "0";
-          setTimeout(() => {
-            instruction.style.display = "none";
-          }, 500);
-        }
-      });
-
-      // Adiciona evento de clique no botão para abrir o site em nova aba
       websiteButton.addEventListener("click", (e) => {
         e.stopPropagation();
         window.open("https://lucaseeduarda.com", "_blank");
