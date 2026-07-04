@@ -1,3 +1,6 @@
 # Arquivos locais (não versionar)
 *.local.md
 PORTFOLIO.local.md
+
+# Backups de imagens substituídas (mantidos só localmente)
+public/*-old.*
