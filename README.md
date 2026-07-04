@@ -2,8 +2,9 @@
 
 > Convite de casamento digital interativo com efeito de flip 3D, desenvolvido em HTML, CSS e JavaScript puro.
 
-🔗 **Site do Casal:** [lucaseeduarda.com](https://lucaseeduarda.com)  
-📦 **Repositório das imagens:** [DevLucasGodoy/WeddingInvitation-3D](https://github.com/DevLucasGodoy/WeddingInvitation-3D)
+💌 **Convite (este site):** [convite-lucaseeduarda.vercel.app](https://convite-lucaseeduarda.vercel.app)  
+🔗 **Site do Casamento:** [lucaseeduarda.com](https://lucaseeduarda.com)  
+📦 **Repositório:** [DevLucasGodoy/WeddingInvitation-3D](https://github.com/DevLucasGodoy/WeddingInvitation-3D)
 
 ---
 
@@ -108,7 +109,7 @@ body {
 }
 ```
 
-**Preview social (WhatsApp/Facebook)** — as tags Open Graph no `<head>` apontam para o domínio final (`lucaseeduarda.com`) e para `public/assets/og-image.jpg`. Ajuste `og:url`, `og:image`, `canonical` e a imagem se mudar de domínio.
+**Dois domínios** — o convite mora em `convite-lucaseeduarda.vercel.app`; o site do casamento em `lucaseeduarda.com`. As tags `canonical`/`og:url`/`og:image`/`twitter:image` apontam para o **domínio do convite** (onde a página e a `og-image.jpg` são servidas); só o botão "Acessar Site" (`window.open`) leva ao **site do casamento**. Ajuste ambos se trocar de domínio.
 
 > Não há elemento de texto/instrução. O único convite ao toque é o anel dourado animado (`.seal-glow`) sobre o lacre do envelope.
 
