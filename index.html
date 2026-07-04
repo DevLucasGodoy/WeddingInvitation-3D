@@ -12,29 +12,65 @@
       }
 
       body {
+        /* Espaço reservado embaixo para a instrução/botão fixos.
+           Duas linhas: vh como fallback, dvh (viewport dinâmica) quando houver
+           suporte — evita que a barra do navegador mobile corte o conteúdo. */
+        --reserved-bottom: clamp(84px, 16vh, 140px);
+        --reserved-bottom: clamp(84px, 16dvh, 140px);
         background-color: #e5ffe6;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
+        min-height: 100dvh;
         font-family: Arial, sans-serif;
         cursor: pointer;
         overflow: hidden;
-        padding: 20px;
+        padding: clamp(10px, 3vw, 24px);
+        padding-bottom: var(--reserved-bottom, 120px);
       }
 
       .container {
-        perspective: 2000px;
-        width: 90%;
-        max-width: 600px;
-        margin-bottom: 100px;
+        /* Perspectiva mais curta = profundidade 3D mais acentuada */
+        perspective: 1600px;
+        perspective-origin: center 40%;
+        /*
+          Largura = o MENOR entre: 92% da largura, teto de 600px, e a altura
+          disponível ÷ proporção do cartão (1.414). Como a altura entra na
+          conta, o convite cabe inteiro em qualquer tela/orientação sem rolagem
+          — sem depender de breakpoints. (linha vh = fallback; dvh sobrepõe)
+        */
+        width: min(
+          92vw,
+          600px,
+          calc((100vh - var(--reserved-bottom, 120px)) / 1.414)
+        );
+        width: min(
+          92vw,
+          600px,
+          calc((100dvh - var(--reserved-bottom, 120px)) / 1.414)
+        );
       }
 
       .scene {
         position: relative;
         width: 100%;
-        padding-bottom: 141.4%;
+        /* Proporção A-series (√2) do convite — substitui o hack padding-bottom
+           e permite que a altura real limite o cartão. */
+        aspect-ratio: 1 / 1.414;
+        transform-style: preserve-3d;
+        /* Elevação (lift) da cena durante o flip é animada aqui */
+        will-change: transform;
+      }
+
+      /* Camada de parallax controlada pelo ponteiro (não conflita com o flip) */
+      .card-tilt {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+        transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+        transition: transform 0.4s ease-out;
       }
 
       .card-3d {
@@ -44,6 +80,7 @@
         transform-style: preserve-3d;
         transition: transform 1.2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
         transform-origin: center center;
+        will-change: transform;
       }
 
       .card-face {
@@ -51,8 +88,9 @@
         width: 100%;
         height: 100%;
         backface-visibility: hidden;
-        border-radius: 10px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        border-radius: clamp(8px, 2.5vw, 16px);
+        box-shadow: 0 clamp(4px, 1.5vw, 10px) clamp(16px, 6vw, 40px)
+          rgba(0, 0, 0, 0.3);
         overflow: hidden;
       }
 
@@ -61,6 +99,39 @@
         height: 100%;
         object-fit: cover;
         display: block;
+      }
+
+      /* Brilho (glare) que segue o ponteiro sobre a face visível */
+      .card-face::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at var(--glare-x, 50%) var(--glare-y, 50%),
+          rgba(255, 255, 255, 0.35),
+          rgba(255, 255, 255, 0) 45%
+        );
+        opacity: var(--glare-opacity, 0);
+        transition: opacity 0.3s ease-out;
+        pointer-events: none;
+      }
+
+      /* Sombra projetada no "chão" — reforça o volume durante o flip */
+      .card-shadow {
+        position: absolute;
+        left: 10%;
+        bottom: -5%;
+        width: 80%;
+        height: 8%;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(0, 0, 0, 0.35),
+          rgba(0, 0, 0, 0) 70%
+        );
+        filter: blur(10px);
+        transform: translateZ(-40px);
+        z-index: -1;
+        will-change: transform, opacity;
       }
 
       .envelope-face {
@@ -75,47 +146,88 @@
         transform: rotateY(0deg);
       }
 
-      /* Estado 1: Mostra envelope */
+      /*
+        Mapeamento de faces (base): envelope e verso ficam a 0deg, frente a 180deg.
+        O envelope (z-index 3) cobre o verso no estado 1. Ao girar, o
+        backface-visibility esconde as costas de cada face — então o envelope
+        "vira" naturalmente em vez de sumir de repente.
+      */
+
+      /* Estado 1: envelope à mostra */
       .state-1 .card-3d {
         transform: rotateY(0deg);
       }
 
-      .state-1 .envelope-face {
-        display: block;
-      }
-
-      /* Estado 2: Mostra frente do convite (esconde envelope) */
+      /* Estado 2: frente do convite (flip 180°) */
       .state-2 .card-3d {
         transform: rotateY(180deg);
       }
 
-      .state-2 .envelope-face {
-        display: none;
-      }
-
-      /* Estado 3: Mostra verso do convite (esconde envelope) */
+      /* Estado 3: verso do convite (flip 360°) */
       .state-3 .card-3d {
         transform: rotateY(360deg);
       }
 
-      .state-3 .envelope-face {
-        display: none;
+      /*
+        No estado 3 a carta volta a 0deg: envelope e verso encaram o usuário ao
+        mesmo tempo. Elevamos o verso acima do envelope para que 2.png vença,
+        sem precisar de display:none (que causava o "pop" ao clicar).
+      */
+      .state-3 .back-face {
+        z-index: 4;
+      }
+
+      /* Elevação da cena em direção ao usuário durante cada flip */
+      .is-flipping .scene {
+        animation: liftFlip 1.2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+      }
+
+      .is-flipping .card-shadow {
+        animation: shadowFlip 1.2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+      }
+
+      @keyframes liftFlip {
+        0%,
+        100% {
+          transform: translateZ(0) scale(1);
+        }
+        50% {
+          transform: translateZ(90px) scale(1.04);
+        }
+      }
+
+      @keyframes shadowFlip {
+        0%,
+        100% {
+          transform: translateZ(-40px) scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: translateZ(-40px) scale(1.2);
+          opacity: 0.55;
+        }
       }
 
       .instruction {
         position: fixed;
-        bottom: 30px;
+        bottom: clamp(12px, 4dvh, 30px);
         left: 50%;
         transform: translateX(-50%);
         color: white;
         background-color: rgba(0, 0, 0, 0.5);
-        padding: 15px 30px;
+        padding: clamp(10px, 2vw, 15px) clamp(18px, 5vw, 30px);
         border-radius: 25px;
-        font-size: 14px;
+        font-size: clamp(12px, 3.4vw, 15px);
         text-align: center;
+        max-width: min(90vw, 420px);
         animation: pulse 2s infinite;
         z-index: 1000;
         transition: opacity 0.5s;
+      }
+
+      /* No estado 3 o botão substitui a instrução */
+      .state-3 .instruction {
+        display: none;
       }
 
       @keyframes pulse {
@@ -145,14 +257,14 @@
 
       .website-button {
         position: fixed;
-        bottom: 20px;
+        bottom: clamp(10px, 3dvh, 24px);
         left: 50%;
         transform: translateX(-50%);
         background-color: #d4a574;
         color: white;
-        padding: 15px 40px;
+        padding: clamp(11px, 2.4vw, 15px) clamp(26px, 7vw, 44px);
         border-radius: 30px;
-        font-size: 16px;
+        font-size: clamp(13px, 3.6vw, 16px);
         font-weight: bold;
         text-decoration: none;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
@@ -163,6 +275,7 @@
         border: none;
         font-family: Arial, sans-serif;
         white-space: nowrap;
+        max-width: 90vw;
       }
 
       .website-button:hover {
@@ -176,61 +289,34 @@
         animation: fadeIn 0.5s ease-out;
       }
 
-      /* Responsividade para telas menores */
-      @media (max-width: 768px) {
+      /*
+        Layout fluido: clamp() em fontes/espaçamentos + largura ciente da altura
+        (via min()/calc na .container) dispensam os breakpoints de largura. Só
+        resta um ajuste para paisagem baixa (ex.: celular deitado), onde sobra
+        pouca altura — encolhe o espaço reservado para o cartão crescer.
+      */
+      @media (max-height: 520px) and (orientation: landscape) {
         body {
-          padding: 10px;
-        }
-
-        .container {
-          margin-bottom: 120px;
-          width: 95%;
-        }
-
-        .website-button {
-          bottom: 15px;
-          padding: 12px 30px;
-          font-size: 14px;
-          max-width: 90%;
-        }
-
-        .instruction {
-          bottom: 20px;
-          padding: 12px 25px;
-          font-size: 13px;
-          max-width: 90%;
+          --reserved-bottom: clamp(56px, 20vh, 88px);
+          --reserved-bottom: clamp(56px, 20dvh, 88px);
         }
       }
 
-      @media (max-width: 480px) {
-        .container {
-          margin-bottom: 100px;
+      /* Acessibilidade: reduz/desliga o movimento quando solicitado */
+      @media (prefers-reduced-motion: reduce) {
+        .card-3d {
+          transition-duration: 0.01ms;
         }
-
-        .website-button {
-          bottom: 10px;
-          padding: 10px 25px;
-          font-size: 13px;
+        .card-tilt {
+          transition: none;
+          transform: none;
         }
-
-        .instruction {
-          bottom: 15px;
-          padding: 10px 20px;
-          font-size: 12px;
+        .is-flipping .scene,
+        .is-flipping .card-shadow {
+          animation: none;
         }
-      }
-
-      /* Ajuste para telas muito pequenas em altura */
-      @media (max-height: 600px) {
-        .container {
-          margin-bottom: 80px;
-          max-width: 400px;
-        }
-
-        .website-button {
-          bottom: 10px;
-          padding: 10px 25px;
-          font-size: 13px;
+        .card-face::after {
+          display: none;
         }
       }
     </style>
@@ -238,42 +324,74 @@
   <body class="state-1">
     <div class="container">
       <div class="scene">
-        <div class="card-3d">
-          <div class="card-face envelope-face">
-            <img
-              src="https://raw.githubusercontent.com/DevLucasGodoy/WeddingInvitation-3D/refs/heads/main/public/3.png"
-              alt="Verso do Convite"
-            />
-          </div>
-          <div class="card-face front-face">
-            <img
-              src="https://raw.githubusercontent.com/DevLucasGodoy/WeddingInvitation-3D/refs/heads/main/public/1.png"
-              alt="Frente do Convite"
-            />
-          </div>
-          <div class="card-face back-face">
-            <img
-              src="https://raw.githubusercontent.com/DevLucasGodoy/WeddingInvitation-3D/refs/heads/main/public/2.png"
-              alt="Verso do Convite"
-            />
+        <div class="card-tilt">
+          <div class="card-3d">
+            <div class="card-face envelope-face">
+              <img
+                src="public/3.png"
+                alt="Envelope do Convite"
+              />
+            </div>
+            <div class="card-face front-face">
+              <img
+                src="public/1.png"
+                alt="Frente do Convite"
+              />
+            </div>
+            <div class="card-face back-face">
+              <img
+                src="public/2.png"
+                alt="Verso do Convite"
+              />
+            </div>
           </div>
         </div>
+        <div class="card-shadow"></div>
       </div>
     </div>
+
+    <p class="instruction" id="instruction"></p>
 
     <button class="website-button" id="websiteButton">Acessar Site</button>
 
     <script>
       let currentState = 1;
       const body = document.body;
+      const scene = document.querySelector(".scene");
       const instruction = document.getElementById("instruction");
       const websiteButton = document.getElementById("websiteButton");
+
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      const supportsHover = window.matchMedia(
+        "(hover: hover) and (pointer: fine)"
+      ).matches;
 
       const messages = [
         "Clique para abrir o convite ✨",
         "Clique para ver o verso 🌸",
         "Clique para mais informações",
       ];
+
+      function render() {
+        body.className = `state-${currentState}`;
+        instruction.textContent = messages[currentState - 1] || "";
+      }
+
+      // Reinicia a animação de elevação a cada flip (truque de reflow)
+      function triggerFlip() {
+        if (prefersReducedMotion) return;
+        body.classList.remove("is-flipping");
+        void body.offsetWidth;
+        body.classList.add("is-flipping");
+      }
+
+      body.addEventListener("animationend", (e) => {
+        if (e.animationName === "liftFlip") {
+          body.classList.remove("is-flipping");
+        }
+      });
 
       body.addEventListener("click", (e) => {
         if (e.target.closest(".website-button")) {
@@ -288,13 +406,41 @@
           currentState = 2;
         }
 
-        body.className = `state-${currentState}`;
+        triggerFlip();
+        render();
       });
 
       websiteButton.addEventListener("click", (e) => {
         e.stopPropagation();
         window.open("https://lucaseeduarda.com", "_blank");
       });
+
+      // Parallax + brilho seguindo o ponteiro (apenas em dispositivos com mouse)
+      if (supportsHover && !prefersReducedMotion) {
+        const MAX_TILT = 7; // graus
+
+        window.addEventListener("pointermove", (e) => {
+          const rect = scene.getBoundingClientRect();
+          const px = (e.clientX - rect.left) / rect.width; // 0..1
+          const py = (e.clientY - rect.top) / rect.height; // 0..1
+          const nx = Math.max(-1, Math.min(1, px * 2 - 1));
+          const ny = Math.max(-1, Math.min(1, py * 2 - 1));
+
+          scene.style.setProperty("--tilt-y", `${nx * MAX_TILT}deg`);
+          scene.style.setProperty("--tilt-x", `${-ny * MAX_TILT}deg`);
+          scene.style.setProperty("--glare-x", `${px * 100}%`);
+          scene.style.setProperty("--glare-y", `${py * 100}%`);
+          scene.style.setProperty("--glare-opacity", "1");
+        });
+
+        window.addEventListener("pointerleave", () => {
+          scene.style.setProperty("--tilt-x", "0deg");
+          scene.style.setProperty("--tilt-y", "0deg");
+          scene.style.setProperty("--glare-opacity", "0");
+        });
+      }
+
+      render();
     </script>
   </body>
 </html>
