@@ -7,7 +7,7 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="public/assets/favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="public/assets/favicon.ico" />
-    <link rel="apple-touch-icon" href="public/1.png" />
+    <link rel="apple-touch-icon" href="public/assets/apple-touch-icon.png" />
 
     <!-- SEO primário -->
     <title>Convite de Casamento - Lucas &amp; Eduarda</title>
@@ -29,7 +29,13 @@
       content="Toque para abrir o convite digital do casamento de Lucas & Eduarda e confirme sua presença."
     />
     <meta property="og:url" content="https://lucaseeduarda.com/" />
-    <meta property="og:image" content="https://lucaseeduarda.com/public/1.png" />
+    <meta
+      property="og:image"
+      content="https://lucaseeduarda.com/public/assets/og-image.jpg"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:alt" content="Convite de Casamento de Lucas & Eduarda" />
     <meta property="og:locale" content="pt_BR" />
 
@@ -40,7 +46,10 @@
       name="twitter:description"
       content="Toque para abrir o convite digital do casamento de Lucas & Eduarda e confirme sua presença."
     />
-    <meta name="twitter:image" content="https://lucaseeduarda.com/public/1.png" />
+    <meta
+      name="twitter:image"
+      content="https://lucaseeduarda.com/public/assets/og-image.jpg"
+    />
     <style>
       * {
         margin: 0;
@@ -132,6 +141,11 @@
         box-shadow: 0 clamp(4px, 1.5vw, 10px) clamp(16px, 6vw, 40px)
           rgba(0, 0, 0, 0.3);
         overflow: hidden;
+      }
+
+      /* <picture> não deve interferir no layout: o <img> preenche a face */
+      .card-face picture {
+        display: contents;
       }
 
       .card-face img {
@@ -490,24 +504,47 @@
         <div class="card-tilt">
           <div class="card-3d">
             <div class="card-face envelope-face">
-              <img
-                src="public/3.png"
-                alt="Envelope do Convite"
-              />
+              <picture>
+                <source srcset="public/3.avif" type="image/avif" />
+                <source srcset="public/3.webp" type="image/webp" />
+                <img
+                  src="public/3.png"
+                  alt="Envelope do Convite"
+                  width="1240"
+                  height="1748"
+                  fetchpriority="high"
+                  decoding="async"
+                />
+              </picture>
               <!-- Realce animado sobre o lacre de cera -->
               <div class="seal-glow"></div>
             </div>
             <div class="card-face front-face">
-              <img
-                src="public/1.png"
-                alt="Frente do Convite"
-              />
+              <picture>
+                <source srcset="public/1.avif" type="image/avif" />
+                <source srcset="public/1.webp" type="image/webp" />
+                <img
+                  src="public/1.png"
+                  alt="Frente do Convite"
+                  width="1240"
+                  height="1748"
+                  decoding="async"
+                />
+              </picture>
             </div>
             <div class="card-face back-face">
-              <img
-                src="public/2.png"
-                alt="Verso do Convite"
-              />
+              <picture>
+                <source srcset="public/2.avif" type="image/avif" />
+                <source srcset="public/2.webp" type="image/webp" />
+                <img
+                  src="public/2.png"
+                  alt="Verso do Convite"
+                  width="1240"
+                  height="1748"
+                  fetchpriority="low"
+                  decoding="async"
+                />
+              </picture>
             </div>
           </div>
         </div>
