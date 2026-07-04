@@ -3,7 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Convite de Casamento - Lucas & Eduarda</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="public/assets/favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="public/assets/favicon.ico" />
+    <link rel="apple-touch-icon" href="public/1.png" />
+
+    <!-- SEO primário -->
+    <title>Convite de Casamento - Lucas &amp; Eduarda</title>
+    <meta
+      name="description"
+      content="Convite digital do casamento de Lucas & Eduarda. Toque para abrir o convite e confirme sua presença."
+    />
+    <meta name="author" content="Lucas & Eduarda" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#2e3a12" />
+    <link rel="canonical" href="https://lucaseeduarda.com/" />
+
+    <!-- Open Graph (WhatsApp, Facebook, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Lucas & Eduarda" />
+    <meta property="og:title" content="Convite de Casamento - Lucas & Eduarda" />
+    <meta
+      property="og:description"
+      content="Toque para abrir o convite digital do casamento de Lucas & Eduarda e confirme sua presença."
+    />
+    <meta property="og:url" content="https://lucaseeduarda.com/" />
+    <meta property="og:image" content="https://lucaseeduarda.com/public/1.png" />
+    <meta property="og:image:alt" content="Convite de Casamento de Lucas & Eduarda" />
+    <meta property="og:locale" content="pt_BR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Convite de Casamento - Lucas & Eduarda" />
+    <meta
+      name="twitter:description"
+      content="Toque para abrir o convite digital do casamento de Lucas & Eduarda e confirme sua presença."
+    />
+    <meta name="twitter:image" content="https://lucaseeduarda.com/public/1.png" />
     <style>
       * {
         margin: 0;
@@ -27,14 +64,17 @@
         font-family: Arial, sans-serif;
         cursor: pointer;
         overflow: hidden;
+        /* Espaçamento simétrico → cartão centralizado na viewport. A instrução
+           e o botão (position: fixed) flutuam sobre a margem inferior; o cartão
+           é dimensionado com folga (--reserved-bottom no cálculo da largura)
+           para não encostar neles. */
         padding: clamp(10px, 3vw, 24px);
-        padding-bottom: var(--reserved-bottom, 120px);
       }
 
       .container {
         /* Perspectiva mais curta = profundidade 3D mais acentuada */
         perspective: 1600px;
-        perspective-origin: center 40%;
+        perspective-origin: center;
         /*
           Largura = o MENOR entre: 92% da largura, teto de 600px, e a altura
           disponível ÷ proporção do cartão (1.414). Como a altura entra na
@@ -138,6 +178,110 @@
         z-index: 3;
       }
 
+      /* Depois de abrir (1→2) o envelope é ocultado de vez: nunca voltamos ao
+         estado 1, então ele não deve reaparecer no loop verso↔frente (era o que
+         causava o "flash" do envelope antes da frente ao voltar do verso). */
+      .opened .envelope-face {
+        visibility: hidden;
+      }
+
+      /* --- Envelope premium (apenas no estado 1) --- */
+
+      /* Realce sobre o lacre de cera real da imagem (~centro, 44% da altura):
+         halo dourado + anel pulsante que sinaliza "toque para abrir". */
+      .seal-glow {
+        position: absolute;
+        left: 50%;
+        top: 44%;
+        width: 34%;
+        aspect-ratio: 1;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .seal-glow::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(233, 201, 110, 0.5),
+          rgba(233, 201, 110, 0) 65%
+        );
+        opacity: 0.25;
+      }
+
+      .seal-glow::after {
+        content: "";
+        position: absolute;
+        inset: 18%;
+        border-radius: 50%;
+        border: 2px solid rgba(212, 165, 116, 0.85);
+      }
+
+      .state-1 .seal-glow::before {
+        animation: sealGlow 4.5s ease-in-out infinite;
+      }
+
+      .state-1 .seal-glow::after {
+        animation: sealRing 2.4s ease-out infinite;
+      }
+
+      /* Envelope flutua de leve e a sombra "respira" — convida ao toque */
+      .state-1 .scene {
+        animation: envFloat 4.5s ease-in-out infinite;
+      }
+
+      .state-1 .card-shadow {
+        animation: envShadow 4.5s ease-in-out infinite;
+      }
+
+      @keyframes envFloat {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-1.6%);
+        }
+      }
+
+      @keyframes envShadow {
+        0%,
+        100% {
+          transform: translateZ(-40px) scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: translateZ(-40px) scale(0.9);
+          opacity: 0.7;
+        }
+      }
+
+      @keyframes sealGlow {
+        0%,
+        100% {
+          opacity: 0.25;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      @keyframes sealRing {
+        0% {
+          transform: scale(0.8);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1.6);
+          opacity: 0;
+        }
+      }
+
       .front-face {
         transform: rotateY(180deg);
       }
@@ -208,38 +352,6 @@
         }
       }
 
-      .instruction {
-        position: fixed;
-        bottom: clamp(12px, 4dvh, 30px);
-        left: 50%;
-        transform: translateX(-50%);
-        color: white;
-        background-color: rgba(0, 0, 0, 0.5);
-        padding: clamp(10px, 2vw, 15px) clamp(18px, 5vw, 30px);
-        border-radius: 25px;
-        font-size: clamp(12px, 3.4vw, 15px);
-        text-align: center;
-        max-width: min(90vw, 420px);
-        animation: pulse 2s infinite;
-        z-index: 1000;
-        transition: opacity 0.5s;
-      }
-
-      /* No estado 3 o botão substitui a instrução */
-      .state-3 .instruction {
-        display: none;
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.6;
-        }
-      }
-
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -260,28 +372,75 @@
         bottom: clamp(10px, 3dvh, 24px);
         left: 50%;
         transform: translateX(-50%);
-        background-color: #d4a574;
-        color: white;
-        padding: clamp(11px, 2.4vw, 15px) clamp(26px, 7vw, 44px);
-        border-radius: 30px;
+        /* Dourado do convite; texto verde-escuro (contraste + identidade) */
+        background: linear-gradient(135deg, #e6c65e 0%, #c9a24a 55%, #b8801f 100%);
+        color: #2e3a12;
+        padding: clamp(12px, 2.4vw, 16px) clamp(28px, 7vw, 46px);
+        border-radius: 999px;
         font-size: clamp(13px, 3.6vw, 16px);
         font-weight: bold;
+        letter-spacing: 0.5px;
         text-decoration: none;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        transition: all 0.3s;
+        box-shadow: 0 6px 20px rgba(120, 90, 20, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
         z-index: 1001;
         display: none;
         cursor: pointer;
         border: none;
-        font-family: Arial, sans-serif;
+        font-family: Georgia, "Times New Roman", serif;
         white-space: nowrap;
         max-width: 90vw;
+        overflow: hidden;
+      }
+
+      /* Brilho que varre o botão ao passar o mouse */
+      .website-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -60%;
+        width: 40%;
+        height: 100%;
+        background: linear-gradient(
+          100deg,
+          transparent,
+          rgba(255, 255, 255, 0.55),
+          transparent
+        );
+        transform: skewX(-20deg);
+        transition: left 0.6s ease;
+        pointer-events: none;
+      }
+
+      .website-button:hover::before {
+        left: 120%;
+      }
+
+      .btn-arrow {
+        display: inline-block;
+        margin-left: 0.5em;
+        transition: transform 0.25s ease;
       }
 
       .website-button:hover {
-        background-color: #c49563;
-        transform: translateX(-50%) scale(1.05);
-        box-shadow: 0 7px 25px rgba(0, 0, 0, 0.4);
+        transform: translateX(-50%) translateY(-2px) scale(1.04);
+        box-shadow: 0 10px 28px rgba(120, 90, 20, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        filter: brightness(1.05);
+      }
+
+      .website-button:hover .btn-arrow {
+        transform: translateX(4px);
+      }
+
+      .website-button:active {
+        transform: translateX(-50%) translateY(0) scale(0.99);
+      }
+
+      .website-button:focus-visible {
+        outline: 3px solid rgba(45, 58, 20, 0.6);
+        outline-offset: 3px;
       }
 
       .state-3 .website-button {
@@ -312,7 +471,11 @@
           transform: none;
         }
         .is-flipping .scene,
-        .is-flipping .card-shadow {
+        .is-flipping .card-shadow,
+        .state-1 .scene,
+        .state-1 .card-shadow,
+        .state-1 .seal-glow::before,
+        .state-1 .seal-glow::after {
           animation: none;
         }
         .card-face::after {
@@ -331,6 +494,8 @@
                 src="public/3.png"
                 alt="Envelope do Convite"
               />
+              <!-- Realce animado sobre o lacre de cera -->
+              <div class="seal-glow"></div>
             </div>
             <div class="card-face front-face">
               <img
@@ -350,15 +515,14 @@
       </div>
     </div>
 
-    <p class="instruction" id="instruction"></p>
-
-    <button class="website-button" id="websiteButton">Acessar Site</button>
+    <button class="website-button" id="websiteButton">
+      Acessar Site<span class="btn-arrow" aria-hidden="true">→</span>
+    </button>
 
     <script>
       let currentState = 1;
       const body = document.body;
       const scene = document.querySelector(".scene");
-      const instruction = document.getElementById("instruction");
       const websiteButton = document.getElementById("websiteButton");
 
       const prefersReducedMotion = window.matchMedia(
@@ -368,16 +532,22 @@
         "(hover: hover) and (pointer: fine)"
       ).matches;
 
-      const messages = [
-        "Clique para abrir o convite ✨",
-        "Clique para ver o verso 🌸",
-        "Clique para mais informações",
-      ];
+      const card = document.querySelector(".card-3d");
 
       function render() {
-        body.className = `state-${currentState}`;
-        instruction.textContent = messages[currentState - 1] || "";
+        // Troca só a classe de estado, preservando classes persistentes
+        // (is-flipping, opened) que o antigo `className =` apagava.
+        body.classList.remove("state-1", "state-2", "state-3");
+        body.classList.add(`state-${currentState}`);
       }
+
+      // Ao terminar o primeiro flip (1→2), esconde o envelope de vez para que
+      // ele não reapareça no ciclo verso↔frente.
+      card.addEventListener("transitionend", (e) => {
+        if (e.propertyName === "transform" && currentState !== 1) {
+          body.classList.add("opened");
+        }
+      });
 
       // Reinicia a animação de elevação a cada flip (truque de reflow)
       function triggerFlip() {
