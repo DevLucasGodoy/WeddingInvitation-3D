@@ -544,9 +544,14 @@
       </div>
     </div>
 
+    <!-- Botão "Acessar Site" desativado por ora. Para reativar, remova os
+         comentários deste bloco — o JS abaixo já é null-safe. -->
+    <!--
     <button class="website-button" id="websiteButton">
       Acessar Site<span class="btn-arrow" aria-hidden="true">→</span>
     </button>
+    -->
+
 
     <script>
       let currentState = 1;
@@ -609,10 +614,13 @@
         render();
       });
 
-      websiteButton.addEventListener("click", (e) => {
-        e.stopPropagation();
-        window.open("https://lucaseeduarda.com", "_blank");
-      });
+      // Só liga o listener se o botão existir (está comentado no HTML por ora)
+      if (websiteButton) {
+        websiteButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          window.open("https://lucaseeduarda.com", "_blank");
+        });
+      }
 
       // Parallax + brilho seguindo o ponteiro (apenas em dispositivos com mouse)
       if (supportsHover && !prefersReducedMotion) {
